@@ -1,6 +1,6 @@
 import connection from "../database/database.js";
 
-export default async function ListaClientes(req, res) {
+export async function listaClientes(req, res) {
     const { cpf } = req.query;
 
     const params = [];
@@ -22,5 +22,24 @@ export default async function ListaClientes(req, res) {
     } catch (err) {
         console.error(err);
         res.sendStatus(500);
+    }
+}
+
+export async function buscaCliente(req, res) {
+    const { id } = req.params;
+
+    try {
+        const { rows: cliente } = await connection.query(
+            `SELECT * FROM customers WHERE id=$1`,
+            [id]
+        );
+        if (cliente.length === 0) {
+            return res.status(404).send("Id de usuário inexistênte");
+        }
+
+        return res.status(200).send(cliente);
+    } catch (err) {
+        console.error(err);
+        return res.sendStatus(500);
     }
 }
