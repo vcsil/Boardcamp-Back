@@ -1,8 +1,8 @@
-import listaCategoriasSchema from "../schemas/listaCategoriasSchema.js";
+import adicionaCategoriaSchema from "../schemas/adicionaCategoriaSchema.js";
 import connection from "../database/database.js";
 
-async function listaCategoriasSchemaValidationMiddleware(req, res, next) {
-    const validation = listaCategoriasSchema.validate(req.body);
+async function adicionaCategoriaSchemaValidationMiddleware(req, res, next) {
+    const validation = adicionaCategoriaSchema.validate(req.body);
     const { name } = req.body;
 
     if (validation.error) {
@@ -20,4 +20,4 @@ async function listaCategoriasSchemaValidationMiddleware(req, res, next) {
     return next();
 }
 
-export default listaCategoriasSchemaValidationMiddleware;
+export default adicionaCategoriaSchemaValidationMiddleware;

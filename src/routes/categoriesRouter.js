@@ -4,7 +4,7 @@ import {
     ListaCategorias,
     AdicionaCategoria,
 } from "../controllers/categoriesController.js";
-import listaCategoriasSchemaValidationMiddleware from "../middlewares/listaCategoriasMiddlewares.js";
+import adicionaCategoriaSchemaValidationMiddleware from "../middlewares/adicionaCategoriaMiddlewares.js";
 
 const categoriesRouter = Router();
 
@@ -12,7 +12,7 @@ categoriesRouter.get("/categories", ListaCategorias);
 
 categoriesRouter.post(
     "/categories",
-    listaCategoriasSchemaValidationMiddleware,
+    adicionaCategoriaSchemaValidationMiddleware,
     AdicionaCategoria
 );
 
