@@ -22,7 +22,7 @@ export async function ListaGames(req, res) {
             params
         );
 
-        res.send(games);
+        res.status(200).send(games);
     } catch (err) {
         console.error(err);
         res.sendStatus(500);

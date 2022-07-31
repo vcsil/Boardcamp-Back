@@ -6,7 +6,7 @@ export async function ListaCategorias(req, res) {
     try {
         const { rows: categorias } = await connection.query(query);
 
-        res.send(categorias);
+        res.status(200).send(categorias);
     } catch (err) {
         console.error(err);
         res.sendStatus(500);
