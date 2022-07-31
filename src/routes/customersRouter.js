@@ -4,7 +4,9 @@ import {
     listaClientes,
     buscaCliente,
     insereCliente,
+    atualizaCliente,
 } from "../controllers/customersController.js";
+import atualizaClienteSchemaValidationMiddleware from "../middlewares/atualizaClienteMiddleware.js";
 import insereClienteSchemaValidationMiddleware from "../middlewares/insereClienteMiddleware.js";
 
 const customersRouter = Router();
@@ -15,6 +17,11 @@ customersRouter.post(
     "/customers",
     insereClienteSchemaValidationMiddleware,
     insereCliente
+);
+customersRouter.put(
+    "/customers/:id",
+    atualizaClienteSchemaValidationMiddleware,
+    atualizaCliente
 );
 
 export default customersRouter;
