@@ -34,12 +34,28 @@ export async function buscaCliente(req, res) {
             [id]
         );
         if (cliente.length === 0) {
-            return res.status(404).send("Id de usuário inexistênte");
+            return res.status(404).send("Id de usuário inexistente");
         }
 
         return res.status(200).send(cliente);
     } catch (err) {
         console.error(err);
         return res.sendStatus(500);
+    }
+}
+
+export async function insereCliente(req, res) {
+    const { name, phone, cpf, birthday } = req.body;
+
+    try {
+        await connection.query(
+            `INSERT INTO customers (name, phone, cpf, birthday) VALUES ($1, $2, $3, $4);`,
+            [name, phone, cpf, birthday]
+        );
+
+        res.sendStatus(201);
+    } catch (err) {
+        console.error(err);
+        res.sendStatus(500);
     }
 }
