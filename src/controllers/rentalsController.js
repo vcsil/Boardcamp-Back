@@ -1,3 +1,4 @@
+/* eslint-disable no-param-reassign */
 import dayjs from "dayjs";
 
 import connection from "../database/database.js";
@@ -42,6 +43,7 @@ export async function listaAlugueis(req, res) {
 }
 
 export async function inserirAluguel(req, res) {
+    // [ customerId, gameId, rentDate, daysRented, returnDate, originalPrice, delayFee ]
     const { customerId, gameId, daysRented } = req.body;
 
     const rentDate = dayjs(Date.now()).format("YYYY-MM-DD"); // Data atual no momento da inserção
@@ -54,12 +56,12 @@ export async function inserirAluguel(req, res) {
             `SELECT * FROM games WHERE id=$1`,
             [gameId]
         );
-        const { pricePerDay } = game;
+        const { pricePerDay } = game[0];
         const originalPrice =
             parseInt(pricePerDay, 10) * parseInt(daysRented, 10);
 
         await connection.query(
-            `INSERT INTO rentals (customerId, gameId, rentDate, daysRented, returnDate, originalPrice, delayFee) 
+            `INSERT INTO rentals ("customerId", "gameId", "rentDate", "daysRented", "returnDate", "originalPrice", "delayFee") 
              VALUES ($1, $2, $3, $4, $5, $6, $7);`,
             [
                 customerId,
@@ -78,4 +80,58 @@ export async function inserirAluguel(req, res) {
         res.sendStatus(500);
     }
 }
-// [ customerId, gameId, rentDate, daysRented, returnDate, originalPrice, delayFee ]
+
+function calculaDiferencaDias(rentDate, returnDate, daysRented) {
+    rentDate = rentDate.replaceAll("-", "/");
+    returnDate = returnDate.replaceAll("-", "/");
+
+    const diaAlugado = new Date(rentDate);
+    const diaDevolvido = new Date(returnDate);
+    const timeDiff = Math.abs(diaDevolvido.getTime() - diaAlugado.getTime());
+    const diffDays = Math.ceil(timeDiff / (1000 * 3600 * 24));
+
+    return diffDays - daysRented;
+}
+
+export async function finalizaAluguel(req, res) {
+    const { id } = req.params;
+    const returnDate = dayjs(Date.now()).format("YYYY-MM-DD");
+
+    try {
+        // Calculando atraso
+        const { rows } = await connection.query(
+            `SELECT * FROM rentals WHERE id=$1`,
+            [id]
+        );
+        const aluguel = rows[0];
+        const { rentDate, daysRented, gameId } = aluguel;
+
+        const diferencaDias = calculaDiferencaDias(
+            rentDate,
+            returnDate,
+            parseInt(daysRented, 10)
+        );
+
+        let delayFee = 0;
+
+        if (diferencaDias > 0) {
+            // eslint-disable-next-line no-shadow
+            const { rows } = await connection.query(
+                `SELECT * FROM games WHERE id=$1`,
+                [gameId]
+            );
+            const { pricePerDay } = rows[0];
+            delayFee = diferencaDias * parseInt(pricePerDay, 10);
+        }
+
+        await connection.query(
+            `UPDATE rentals SET "returnDate"=$1, "delayFee"=$2 WHERE id=$3;`,
+            [returnDate, delayFee, id]
+        );
+
+        res.send(200);
+    } catch (err) {
+        console.error(err);
+        res.sendStatus(500);
+    }
+}
