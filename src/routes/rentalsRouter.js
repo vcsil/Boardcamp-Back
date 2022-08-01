@@ -3,8 +3,10 @@ import {
     listaAlugueis,
     inserirAluguel,
     finalizaAluguel,
+    deletaAluguel,
 } from "../controllers/rentalsController.js";
-import finalizaAluguelSchemaValidationMiddleware from "../middlewares/finalizaAluguelMiddlewares.js";
+import deletaAluguelValidationMiddleware from "../middlewares/deletaAluguelMiddleware.js";
+import finalizaAluguelValidationMiddleware from "../middlewares/finalizaAluguelMiddlewares.js";
 import inserirAluguelSchemaValidationMiddleware from "../middlewares/inserirAluguelMiddleware.js";
 
 const rentalsRouter = Router();
@@ -17,8 +19,13 @@ rentalsRouter.post(
 );
 rentalsRouter.post(
     "/rentals/:id/return",
-    finalizaAluguelSchemaValidationMiddleware,
+    finalizaAluguelValidationMiddleware,
     finalizaAluguel
+);
+rentalsRouter.delete(
+    "/rentals/:id",
+    deletaAluguelValidationMiddleware,
+    deletaAluguel
 );
 
 export default rentalsRouter;

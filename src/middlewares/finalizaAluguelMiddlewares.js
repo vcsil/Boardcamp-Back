@@ -1,6 +1,6 @@
 import connection from "../database/database.js";
 
-async function finalizaAluguelSchemaValidationMiddleware(req, res, next) {
+async function finalizaAluguelValidationMiddleware(req, res, next) {
     const { id } = req.params;
 
     try {
@@ -25,4 +25,4 @@ async function finalizaAluguelSchemaValidationMiddleware(req, res, next) {
     }
 }
 
-export default finalizaAluguelSchemaValidationMiddleware;
+export default finalizaAluguelValidationMiddleware;

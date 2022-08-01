@@ -135,3 +135,16 @@ export async function finalizaAluguel(req, res) {
         res.sendStatus(500);
     }
 }
+
+export async function deletaAluguel(req, res) {
+    const { id } = req.params;
+
+    try {
+        await connection.query(`DELETE FROM rentals WHERE id=$1`, [id]);
+
+        res.sendStatus(200);
+    } catch (err) {
+        console.error(err);
+        res.sendStatus(500);
+    }
+}
