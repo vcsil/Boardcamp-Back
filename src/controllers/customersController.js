@@ -37,7 +37,9 @@ export async function buscaCliente(req, res) {
             return res.status(404).send("Id de usuário inexistente");
         }
 
-        return res.status(200).send(cliente);
+        console.log(cliente)
+
+        return res.status(200).send(cliente[0]);
     } catch (err) {
         console.error(err);
         return res.sendStatus(500);

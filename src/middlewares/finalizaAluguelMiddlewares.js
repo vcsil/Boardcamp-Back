@@ -6,10 +6,10 @@ async function finalizaAluguelValidationMiddleware(req, res, next) {
     try {
         // Verifica se existe aluguel
         const aluguelExiste = await connection.query(
-            `SELECT * FROM customers WHERE cpf = $1`,
+            `SELECT * FROM rentals WHERE id = $1`,
             [id]
         );
-        if (aluguelExiste.rowCount > 0) {
+        if (aluguelExiste.rowCount === 0) {
             return res.status(404).send("Aluguel não existe.");
         }
         // Verifica se aluguel esta aberto

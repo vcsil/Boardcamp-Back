@@ -1,3 +1,5 @@
+/* eslint-disable no-use-before-define */
+/* eslint-disable no-underscore-dangle */
 /* eslint-disable no-param-reassign */
 import dayjs from "dayjs";
 
@@ -26,27 +28,68 @@ export async function listaAlugueis(req, res) {
         }
 
         const { rows: alugueis } = await connection.query(
-            `SELECT rentals.*, customers.name AS customer, games.name, categories.*
-             FROM rentals
-             JOIN customers ON customers.id=rentals."customerId"
-             JOIN games ON games.id=rentals."gameId"
-             JOIN categories ON categories.id=games."categoryId"
-            ${filtro}`,
-            params
+            {
+                text: `
+                    SELECT rentals.*, customers.name AS customer, games.name, categories.*
+                    FROM rentals
+                    JOIN customers ON customers.id=rentals."customerId"
+                    JOIN games ON games.id=rentals."gameId"
+                    JOIN categories ON categories.id=games."categoryId"
+                    ${filtro}`,
+                rowMode: "array"
+            },params
         );
 
-        res.status(200).send(alugueis);
+        res.status(200).send(alugueis.map(_mapRentalsArrayToObject));
     } catch (err) {
         console.error(err);
         res.sendStatus(500);
     }
 }
 
+function _mapRentalsArrayToObject(row) {
+    const [
+      id,
+      customerId,
+      gameId,
+      rentDate,
+      daysRented,
+      returnDate,
+      originalPrice,
+      delayFee,
+      customerName,
+      gameName,
+      categoryId,
+      categoryName
+    ] = row;
+  
+    return {
+      id,
+      customerId,
+      gameId,
+      rentDate,
+      daysRented,
+      returnDate,
+      originalPrice,
+      delayFee,
+      customer: {
+        id: customerId,
+        name: customerName
+      },
+      game: {
+        id: gameId,
+        name: gameName,
+        categoryId,
+        categoryName
+      }
+    };
+}
+
 export async function inserirAluguel(req, res) {
     // [ customerId, gameId, rentDate, daysRented, returnDate, originalPrice, delayFee ]
     const { customerId, gameId, daysRented } = req.body;
 
-    const rentDate = dayjs(Date.now()).format("YYYY-MM-DD"); // Data atual no momento da inserção
+    const rentDate = String(dayjs(Date.now()).format("YYYY-MM-DD")); // Data atual no momento da inserção
     const returnDate = null;
     const delayFee = null;
 
@@ -104,7 +147,10 @@ export async function finalizaAluguel(req, res) {
             [id]
         );
         const aluguel = rows[0];
-        const { rentDate, daysRented, gameId } = aluguel;
+        const { daysRented, gameId } = aluguel;
+        let { rentDate } = aluguel
+
+        rentDate = String(dayjs(rentDate).format("YYYY-MM-DD"));
 
         const diferencaDias = calculaDiferencaDias(
             rentDate,
@@ -129,7 +175,7 @@ export async function finalizaAluguel(req, res) {
             [returnDate, delayFee, id]
         );
 
-        res.send(200);
+        res.sendStatus(200);
     } catch (err) {
         console.error(err);
         res.sendStatus(500);
@@ -138,6 +184,8 @@ export async function finalizaAluguel(req, res) {
 
 export async function deletaAluguel(req, res) {
     const { id } = req.params;
+
+    console.log(id)
 
     try {
         await connection.query(`DELETE FROM rentals WHERE id=$1`, [id]);

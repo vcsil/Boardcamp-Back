@@ -17,9 +17,11 @@ async function deletaAluguelValidationMiddleware(req, res, next) {
         if (returnDate !== null) {
             return res.status(400).send("Aluguel já finalizado.");
         }
+
+        next()
     } catch (err) {
         console.error(err);
-        res.sendStatus(500);
+        return res.sendStatus(500);
     }
 }
 
